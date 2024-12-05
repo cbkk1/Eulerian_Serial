@@ -24,75 +24,134 @@ void unite(int parent[], int rank[], int x, int y) {
     }
 }
 
-void createCSR(int N,int arr1[],int arr2[],int edgeCount)
+void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
 {
-    int row[N];
+    int vertex[N],index,edge1,edge2;
+    int* edges = new int[2*edgeCount] ();
+    int* final_rank=new int[2*edgeCount] ();
+
+
     for (int i = 0; i < N+1; i++) {
-    row[i] = 0;
+    vertex[i] = 0;
     }
 
     for (int i = 0; i < 2*N-1; i++){
-        row[arr1[i]]++;
+        vertex[arr1[i]+1]++;
 
-    } cout<<"Rows " << endl;
+    } 
+    //PREFIX SUM BELOW
 
-    for (int i = 0; i <N; i++){
-        printf("%d ",row[i]++);
+    for (int i = 1; i < N+1; i++) {
+    vertex[i] += vertex[i - 1];
+    }
 
-    }cout << endl;
+    for (int i = 0; i < 2*edgeCount; i++) {
+    edges[i] = -1;
+    }
+
+    for(int i=0;i<2*N-2;i++)
+    {
+        index= vertex[arr1[i]];
+        while(edges[index]!=-1)
+        {
+            index++;
+        }
+        edges[index]=i;
+    }
+    // cout<<"vertexs " << endl;
+
+    // for (int i = 0; i <N+1; i++){
+    //     printf("%d ",vertex[i]);
+
+    // }cout << endl;
+
+
+    // cout<<"Edges " << endl;
+
+    // for (int i = 0; i <2*edgeCount; i++){
+    //     printf("%d ",edges[i]);
+
+    // }cout << endl;
+
+
+
+    int succ[2*edgeCount];
+    int vertex_val=1;
+
+    for(int i=0;i<2*edgeCount;i++)
+    {
+        if(i>=vertex[vertex_val])
+        {
+            vertex_val++;
+        }
+        int x=edges[i];
+        int succ_val= (x+edgeCount)%((2*edgeCount));
+        
+        if (i + 1 == vertex[vertex_val]) {
+        succ[succ_val] = edges[vertex[vertex_val - 1]];
+        //cout << "Succ = " << succ_val << " val= " << edges[vertex[vertex_val - 1]] << " Calculatedby = " << i << " vertex val = " << vertex_val << endl;
+        }
+
+         else
+        {
+            //cout << "Succ = " << succ_val << " val= " << edges[i+1] << "Calculatedby = " << i << endl;
+            succ[succ_val]=edges[i+1];
+        }
+            
+        //cout << " "<<succ_val << "=" << edges[i+1] << endl;
+    }    
+
+    // cout << endl;cout << endl << "successor " << endl;
+    // for(int i=0;i<2*edgeCount;i++)
+    // {
+    //     cout << " "<< succ[i] ;
+    // }
+    int prev=edges[vertex[root]];
+    final_rank[prev]=0;
+    // cout <<endl << "First Child " << root<< "First Edge Number "<<prev<<endl;
+
+    for(int i=1;i<2*edgeCount;i++)
+    {
+        
+        final_rank[succ[prev]]=i;
+        prev=succ[prev];
+    }
+
+    // cout << endl;cout << endl << "Final Rank " << endl;
+    // for(int i=0;i<2*edgeCount;i++)
+    // {
+    //     cout << " "<< final_rank[i] ;
+    // }
+    // cout << endl;
+
+    int parent[N];
+
+    for(int i=0;i<N;i++)
+    {
+        edge1=i;
+        edge2=i+N-1;
+        if(final_rank[edge1]<final_rank[edge2])
+        {
+            parent[arr2[i]]=arr1[i];
+        }
+        else{
+            parent[arr1[i]]=arr2[i];
+        }
+    }
+    parent[root]=-1;
+
+    cout<< endl << "Parent List After Eulerian" << endl;
+
+    for (int i = 0; i < N; i++)
+    {
+        printf("%d ",parent[i]);
+    }
+    cout << endl;
     
+
+
+
 }
-
-void generateCSR(int N, int arr1[], int arr2[], int edgeCount) {
-    int* edge_start = new int[N + 1](); 
-    int* edge_numbers = new int[edgeCount]; 
-
-
-    for (int i = 0; i < edgeCount; i++) {
-        edge_start[arr1[i]+1]++; 
-    }
-
-    cout << "Start Arrays " << endl;
-    for (int i = 0; i < edgeCount; i++) {
-        printf("%d ",edge_start[i]); 
-    }
-    cout << endl;
-
-
-    for (int i = 1; i <= N; i++) {
-        edge_start[i] += edge_start[i - 1];
-    }
-
-    // Temporary array to track positions within each vertex's range
-    int* temp = new int[N]();
-    for (int i = 0; i < edgeCount; i++) {
-        int parent = arr1[i];
-        int pos = edge_start[parent] + temp[parent];
-        edge_numbers[pos] = i; // Insert edge index
-        temp[parent]++;
-    }
-
-    delete[] temp;
-
-    // Output the CSR representation (only edge numbers)
-    cout << "CSR Representation (Edge Numbers Only):" << endl;
-    cout << "edge_start: ";
-    for (int i = 0; i <= N; i++) {
-        cout << edge_start[i] << " ";
-    }
-    cout << endl;
-
-    cout << "edge_numbers: ";
-    for (int i = 0; i < edgeCount; i++) {
-        cout << edge_numbers[i] << " ";
-    }
-    cout << endl;
-
-    // Clean up
-    delete[] edge_start;
-    delete[] edge_numbers;
-}
-
 
 
 void generateTree(int N, int root) {
@@ -102,7 +161,7 @@ void generateTree(int N, int root) {
     int* arr2 = new int[2*(N - 1)];
     int* parentArray = new int[N]; 
     int* parent = new int[N];  
-    int* rank = new int[N](); 
+    int* rank = new int[N]();
 
 
     for (int i = 0; i < N; i++) {
@@ -142,17 +201,17 @@ void generateTree(int N, int root) {
     }
 
 
-    cout << "Edge Arrays:" << endl;
-    cout << "arr1: ";
-    for (int i = 0; i < 2*(N-1); i++) cout << arr1[i] << " ";
-    cout << endl;
+    // cout << "Edge Arrays:" << endl;
+    // cout << "arr1: ";
+    // for (int i = 0; i < 2*(N-1); i++) cout << arr1[i] << " ";
+    // cout << endl;
 
-    cout << "arr2: ";
-    for (int i = 0; i < 2*(N - 1); i++) cout << arr2[i] << " ";
-    cout << endl;
+    // cout << "arr2: ";
+    // for (int i = 0; i < 2*(N - 1); i++) cout << arr2[i] << " ";
+    // cout << endl;
 
 
-    cout << "Parent Array (Index represents the node, value represents its parent):" << endl;
+    cout << "Parent Array Original" << endl;
     for (int i = 0; i < N; i++) {
         cout << parentArray[i] << " ";
     }
@@ -160,7 +219,13 @@ void generateTree(int N, int root) {
 
 
     //generateCSR(N, arr1, arr2, N - 1);
-    createCSR(N,arr1,arr2,edgeIndex);
+    createCSR(N,arr1,arr2,edgeIndex,root);
+
+    delete[] arr1;
+    delete[] arr2;
+    delete[] parent;
+    delete[] parentArray;
+    delete[] rank;
 
 
 }
