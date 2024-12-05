@@ -3,7 +3,18 @@
 #include <ctime>
 using namespace std;
 
+void checkArrays(int arr1[], int arr2[], int N) {
+    int res = 0;
+    for (int i = 0; i < N; i++) {
+        res = (arr1[i] ^ arr2[i]);
+    }
 
+    if (res == 0) {
+        cout << "Same" << endl;
+    } else {
+        cout << "Not Same" << endl;
+    }
+}
 int find(int parent[], int x) {
     if (parent[x] == x) return x;
     return parent[x] = find(parent, parent[x]);
@@ -24,9 +35,10 @@ void unite(int parent[], int rank[], int x, int y) {
     }
 }
 
-void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
+void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root,int actual_parent[])
 {
-    int vertex[N],index,edge1,edge2;
+    int* vertex= new int [N+2];
+    int index,edge1,edge2;
     int* edges = new int[2*edgeCount] ();
     int* final_rank=new int[2*edgeCount] ();
 
@@ -35,7 +47,7 @@ void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
     vertex[i] = 0;
     }
 
-    for (int i = 0; i < 2*N-1; i++){
+    for (int i = 0; i < (2*N)-2; i++){
         vertex[arr1[i]+1]++;
 
     } 
@@ -45,7 +57,7 @@ void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
     vertex[i] += vertex[i - 1];
     }
 
-    for (int i = 0; i < 2*edgeCount; i++) {
+    for (int i = 0; i < 2*edgeCount+2; i++) {
     edges[i] = -1;
     }
 
@@ -75,7 +87,7 @@ void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
 
 
 
-    int succ[2*edgeCount];
+    int* succ = new int[2 * edgeCount](); // Dynamically allocate and initialize to 0
     int vertex_val=1;
 
     for(int i=0;i<2*edgeCount;i++)
@@ -124,7 +136,7 @@ void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
     // }
     // cout << endl;
 
-    int parent[N];
+    int* parent= new int [N];
 
     for(int i=0;i<N;i++)
     {
@@ -140,13 +152,18 @@ void createCSR(int N,int arr1[],int arr2[],int edgeCount,int root)
     }
     parent[root]=-1;
 
-    cout<< endl << "Parent List After Eulerian" << endl;
+    // cout<< endl << "Parent List After Eulerian" << endl;
 
-    for (int i = 0; i < N; i++)
-    {
-        printf("%d ",parent[i]);
-    }
-    cout << endl;
+    // for (int i = 0; i < N; i++)
+    // {
+    //     printf("%d ",parent[i]);
+    // }
+    // cout << endl;
+
+    checkArrays(parent,actual_parent,N);
+
+    //delete[] edges;
+    //delete[] final_rank;
     
 
 
@@ -211,15 +228,15 @@ void generateTree(int N, int root) {
     // cout << endl;
 
 
-    cout << "Parent Array Original" << endl;
-    for (int i = 0; i < N; i++) {
-        cout << parentArray[i] << " ";
-    }
-    cout << endl;
+    // cout << "Parent Array Original" << endl;
+    // for (int i = 0; i < N; i++) {
+    //     cout << parentArray[i] << " ";
+    // }
+    // cout << endl;
 
 
     //generateCSR(N, arr1, arr2, N - 1);
-    createCSR(N,arr1,arr2,edgeIndex,root);
+    createCSR(N,arr1,arr2,edgeIndex,root,parentArray);
 
     delete[] arr1;
     delete[] arr2;
